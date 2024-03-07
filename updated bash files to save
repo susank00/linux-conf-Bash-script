@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Check if the number of arguments is correct
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <command> <output_file>"
+    exit 1
+fi
+
+command="$1"
+output_file="$2"
+
+# Save the command input to the specified file
+echo "Command: $command" >> "$output_file"
+
+# Execute the command, display its output in the terminal, and append it to the specified file
+echo "Output:"
+eval "$command" | tee -a "$output_file"
+
+# Notify the user about the completion of the operation
+echo "Command output appended to $output_file"
