@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# Check if the number of arguments is correct
+if [ $# -lt 2 ]; then
+    echo "Usage: $0 <command> <output_file>"
+    exit 1
+fi
+
+# Save the command and output to the specified file
+echo "Command: $1" | tee -a "$2"
+echo "Output:" | tee -a "$2"
+eval "$1" | tee -a "$2"
+
+# Notify the user about the completion of the operation
+echo "Command and output saved to $2"
