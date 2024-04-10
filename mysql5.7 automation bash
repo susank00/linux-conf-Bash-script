@@ -1,0 +1,41 @@
+#!/bin/bash
+file_url="https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb"
+
+destination_path="/home/susan/Downloads/mysql-apt-config_0.8.12-1_all.deb"
+
+wget -O "$destination_path" "$file_url"
+
+if [ $? -eq 0 ]; then
+
+        echo "Download completed successfully"
+      sudo dpkg -I "$destination_path"
+if [ $? -eq 0 ]; then
+        echo "installtion completed succesfully"
+sudo apt update
+
+#doing the apt update here
+echo "sudo apt updated also"
+#now installing the mysq 5.7 particulary
+echo "now installing mysql 5.7 from the mysql server"
+sudo apt install -f mysql-client=5.7* mysql-community-server=5.7* mysql-server=5.7*
+
+if [ $? -eq 0 ]; then
+        echo "installed the mysql 5.7 congrats "
+
+else
+        echo "mysql 5.7 failed sorry"
+fi
+
+else
+        echo"installation failed"
+fi
+else 
+
+        echo "download failed "
+
+fi
+~                                                                                                         
+~                                                                                                         
+~                                                                                                         
+~                                                                                                         
+~                  
