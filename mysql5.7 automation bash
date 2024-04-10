@@ -1,17 +1,21 @@
 #!/bin/bash
+#<<<<<<<<<<<<<assigning the variable of url files to download>>>>>
 file_url="https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb"
 
+#destination path assigned in the variable
 destination_path="/home/susan/Downloads/mysql-apt-config_0.8.12-1_all.deb"
 
+#downloading the file direclty from the assigned variable
 wget -O "$destination_path" "$file_url"
 
 if [ $? -eq 0 ]; then
 
         echo "Download completed successfully"
-      sudo dpkg -I "$destination_path"
+      sudo dpkg -i "$destination_path"
 if [ $? -eq 0 ]; then
         echo "installtion completed succesfully"
-sudo apt update
+echo "now updating the apt"
+        sudo apt update
 
 #doing the apt update here
 echo "sudo apt updated also"
@@ -23,19 +27,16 @@ if [ $? -eq 0 ]; then
         echo "installed the mysql 5.7 congrats "
 
 else
-        echo "mysql 5.7 failed sorry"
+        echo "installation of mysql 5.7 failed sorry for more information please visit the step by step guide https://www.linkedin.com/pulse/installing-mysql-57-80-ubuntu-1804-2004-later-humphrey-ikhalea-peocf/ "
 fi
 
 else
         echo"installation failed"
 fi
-else 
+else
 
         echo "download failed "
 
 fi
-~                                                                                                         
-~                                                                                                         
-~                                                                                                         
-~                                                                                                         
+~                                                                                                           
 ~                  
