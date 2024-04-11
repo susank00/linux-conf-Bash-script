@@ -1,0 +1,17 @@
+#!/bin/bash
+#check if mysql is intalled or not 
+mysql --version
+if [ $? -eq 0 ]; then
+       echo "mysql is installed"
+       sudo mysql -u root -p
+       if [ $? -eq 0 ]; then
+               echo "opening mysql"
+else
+        echo "couldnot open mysql"
+       fi
+else
+ echo "mysql is not installed"  
+       fi
+~
+~
+~           
