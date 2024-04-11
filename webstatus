@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "enter the website name:example www.susankhatri.com"
+
+read web
+
+if [ -n  "$web" ]; then
+        pinga=$(ping -c 3  "$web" 2>&1)
+
+        echo "$pinga"
+if [ $? -eq 0 ]; then
+        echo "the website is up "
+else
+        echo " the website is down "
+
+fi
+
+else
+        echo "no input"
+fi
+
+~                                                                                          
+~                                                                                          
+~                                                                                          
+~                                                                                          
+~                                                                                          
+~                                                                                          
+~                                                                                          
+~                                               
