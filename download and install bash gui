@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# Display a dialog box to prompt the user for input
+file_url=$(zenity --entry --title="Download File" --text="Enter the web address of what you want to download:")
+
+# Check if the user canceled or pressed Esc
+if [ $? -eq 0 ]; then
+    # Prompt the user to select the destination path for installation
+    destination_path=$(zenity --entry --title="Select Destination Folder" --text="Select the location where you want to install:")
+
+    # Check if the user canceled or pressed Esc
+    if [ $? -eq 0 ]; then
+        # Download the file to the destination path
+        wget -O "$destination_path" "$file_url"
+
+        # Check if wget command was successful
+        if [ $? -eq 0 ]; then
+            # Install the downloaded file using dpkg
+            sudo dpkg -i "$destination_path"
+
+            # Check if dpkg command was successful
+            if [ $? -eq 0 ]; then
+                # Update apt
+                sudo apt update
+                zenity --info --title="Installation Success" --text="Installation successful. Apt updated."
+                exit 0
+            fi
+        fi
+    fi
+fi
+
+# End of script
+
+~                            
