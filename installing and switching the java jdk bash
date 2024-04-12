@@ -1,0 +1,45 @@
+#!/bin/bash
+
+echo "Checking Java version..."
+
+# Capture the output of `java -version` and redirect stderr to stdout
+java_version=$(java -version 2>&1)
+
+if [ $? -ne 0 ]; then
+    echo "Java is not installed."
+    echo "Select which version to install: 8 | 9 | 11"
+    read -p "Enter the version number: " name
+
+    if [ "$name" = "8" ]; then
+        echo "Installing JDK 8..."
+        sudo apt-get install openjdk-8-jdk
+    elif [ "$name" = "11" ]; then
+        echo "Installing JDK 11..."
+        sudo apt-get install openjdk-11-jdk
+    elif [ "$name" = "21" ]; then
+        echo "Installing JDK 11..."
+        sudo apt-get install openjdk-21-jdk
+    else
+        echo "Invalid version number selected."
+    fi
+else
+    echo " current javaversion $java_version"
+    echo " lets switch the jdk version "
+    echo "below are the jdk version installed in your system"
+   update=$(update-java-alternatives --list)
+   echo " $update "
+ echo "Select which version to switch: 8 | 11 | 21"
+    read -p "enter the version name" version
+      if [ "$version" = "8" ]; then
+        echo "switching to jdk 8..."
+       sudo update-java-alternatives --set java-1.8.0-openjdk-amd64
+    elif [ "$version" = "11" ]; then
+        echo "switching JDK 11..."
+       sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
+    elif [ "$version" = "21" ]; then
+        echo "switching JDK 21..."
+      sudo update-java-alternatives --set java-1.21.0-openjdk-amd64
+    else
+        echo "Invalid version number selected."
+    fi
+fi
