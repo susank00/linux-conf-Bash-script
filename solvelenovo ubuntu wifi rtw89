@@ -1,0 +1,1 @@
+OK! I've been able to resolve all issues by creating the file /usr/lib/modprobe.d/70-rtw89.conf with the following line: options rtw89_pci disable_clkreq=y disable_aspm_l1=y disable_aspm_l1ss=y
