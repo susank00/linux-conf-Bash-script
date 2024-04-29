@@ -1,0 +1,20 @@
+#!/bin/bash
+# MySQL database credentials
+DB_USER="root"
+DB_PASS="8604"
+DB_NAME="mfin_db"
+# Backup directory
+BACKUP_DIR="/home/susan/Documents/backup"
+# Create backup filename
+BACKUP_FILE="$BACKUP_DIR/backup_$(date +'%Y%m%d_%H%M%S').sql"
+# Backup MySQL database
+mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$BACKUP_FILE"
+# Check if mysqldump was successful
+if [ $? -eq 0 ]; then
+    echo "Database backup successful. Sending backup file to Slack..."
+    # Send backup file to Slack
+    curl -F file=@"$BACKUP_FILE" -F "initial_comment=Database backup" -F channels="C06VB823JFP" -H "Authorization: Bearer xoxb-4352103815826-7002506387585-LFkyc0fgGwkIvP5rL3AiaJS8" https://slack.com/api/files.upload
+    echo "Backup file sent to Slack."
+else
+    echo "Database backup failed."
+fi
