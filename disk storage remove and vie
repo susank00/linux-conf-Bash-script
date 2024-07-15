@@ -1,0 +1,4 @@
+sudo du * -sh
+df -h
+cd docker/
+cd overlay2/
