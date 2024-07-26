@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Capture the container ID of the running container
+container_id=$(docker ps --format "{{.ID}}" | head -n 1)
+
+# Check if container_id is empty
+if [ -z "$container_id" ]; then
+  echo "No running container found."
+else
+  # Extract the first 9 characters of the container ID
+  short_container_id=${container_id:0:9}
+  echo "Short Container ID: $short_container_id"
+fi
