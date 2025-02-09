@@ -1,0 +1,536 @@
+visit the site https://easylinuxtipsproject.blogspot.com/p/realtek.html#ID9 and if not avaiable below is the docs
+
+
+Easy Linux Tips Project
+
+Easy tips for Linux Mint and Ubuntu, both for beginners and for advanced users.
+Realtek wireless chipset: install the right driver
+
+Back to the home page
+
+
+In some cases you can try another driver for Realtek chipsets in Linux Mint 22.x and Ubuntu 24.04.x. This page will show you how.
+
+Contents of this page:
+
+    1. If unsure: determine the WiFi chipset
+    2. Driver for the Realtek RTL8192EU chipset (2357:0109)
+    3. HP laptop with RTL8723BE chipset: try antenna selection
+    4. Driver for the Realtek RTL8723BU chipset (0bda:b720)
+    5. HP laptop with RTL8723DE chipset: try antenna selection or a new driver
+    6. Driver for the Realtek RTL8821CE chipset
+    7. The rtw88 driver for many Realtek chipsets
+    8. Driver for the Realtek RTL8814AU WiFi chipset
+    9. The rtw89 driver from lwfinger for the RTL8852AE, RTL8852BE and RTL8852CE chipsets
+    10. Check the Draft tips for more Realtek WiFi solutions
+
+
+If unsure: determine the WiFi chipset
+1. Are you unsure what Realtek WiFi chipset you have? That can happen easily, because the brand and type printed on a USB WiFi dongle or internal PCI card are meaningless; "under the hood" it can be anything.
+
+Ordinarily, you can determine your WiFi chipset like this:
+
+
+a. If it's a USB WiFi dongle, connect it to your computer.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Use copy/paste to transfer the following command into the terminal:
+
+inxi -Fxz
+
+(if you type: the letter F is a capital letter, and don't omit the space after inxi!)
+
+Press Enter. In the complete hardware overview you get to see then, you should also find your WiFi chipset.
+
+d. But in a few cases, inxi doesn't give sufficient information. You can then proceed as follows:
+
+For a USB WiFi dongle, use copy/paste to transfer the following word into the terminal :
+
+lsusb
+
+Press Enter.
+
+For an internal PCI WiFi card, use the terminal command lspci
+
+e. Now you should see at least one line that approximately resembles the following output (example from my own computer):
+
+Bus 002 Device 007: ID 0bda:b720 Realtek Semiconductor Corp.
+
+f. The combination of characters and numbers that I've printed in red, is the unique ID of your Realtek chipset. Use Google to find out what the type name of that chipset is.
+
+
+Driver for the Realtek RTL8192EU chipset (2357:0109)
+2. Below you'll find a how-to for installing another driver for your RTL8192EU WiFi chipset. Proceed like this:
+
+a. First establish temporary internet connection for your computer by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+d. Copy/paste the following command lines into the terminal, one by one. Press Enter after each individual line:
+
+sudo apt-get install git linux-headers-generic build-essential dkms
+
+git clone https://github.com/clnhub/rtl8192eu-linux.git
+
+cd rtl8192eu-linux
+
+./install_wifi.sh
+(note the dot at the beginning of the command line!)
+
+e. Reboot your computer.
+
+f. Now check whether the driver module has been loaded, with this terminal command:
+
+lsmod | grep 8192eu
+
+g. Now you're going to remove the folder with the driver building blocks, which has become useless (and can't be used for other kernels, as it has been tailored to your current kernel by "make"). With this command:
+
+rm -v -R --interactive=never ~/rtl8192eu-linux
+
+HP laptop with RTL8723BE chipset: try antenna selection
+3. Some HP laptops with the Realtek WiFi chipset card RTL8723BE have just one antenna on that card designed for two (stingy HP, anyone?). This has caused many problems for Linux users, as the default antenna is usually the missing one....
+
+But thanks to Larry Finger and the good people at Realtek you can do some testing with a module parameter that allows for antenna selection. As follows:
+
+a. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+b. First unload the currently active module with this command (use copy/paste to transfer it into the terminal):
+
+sudo modprobe -r rtw_8723be
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+c. Then reload it with the instruction to use antenna number 2, with this command:
+
+sudo modprobe rtw_8723be ant_sel=2
+
+Press Enter.
+
+d. Then check the signal strength with this command:
+
+iwlist scan | egrep -i 'ssid|quality'
+
+Press Enter.
+
+e. Then test the the other antenna (number 1), to find out which one has a stronger signal. For this, execute the following three commands:
+
+sudo modprobe -r rtw_8723be
+
+sudo modprobe rtw_8723be ant_sel=1
+
+iwlist scan | egrep -i 'ssid|quality'
+
+f. If ant_sel=2 gives the best signal (which is usually the case), do this (this is one line, use copy/paste to transfer it to the terminal):
+
+echo "options rtw_8723be ant_sel=2" | sudo tee -a /etc/modprobe.d/rtw_8723be.conf
+
+Reboot your computer.
+
+If ant_sel=1 gives the best signal (unusual, but not impossible), do this (this is one line, use copy/paste to transfer it to the terminal):
+
+echo "options rtw_8723be ant_sel=1" | sudo tee -a /etc/modprobe.d/rtw_8723be.conf
+
+
+Driver for the Realtek RTL8723BU chipset (0bda:b720)
+4. For the Realtek RTL8723BU chipset, you might need to install another driver. In which case you can proceed like this:
+
+a. First establish temporary internet connection for your computer by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+d. Copy/paste the following command line into the terminal, in order to install the required build packages (the building tools with which you're going to build the driver):
+
+sudo apt-get install git build-essential linux-headers-$(uname -r)
+
+e. Download the driver packages by means of git, with this command (use copy/paste):
+
+git clone https://github.com/lwfinger/rtl8723bu
+
+f. Now you're going to disable a line in the makefile of the new driver, because without this hack, two instances of the wireless chipset will show in Network Manager (which would of course be bizarre and useless). The command below is one huge line; make sure you copy/paste it, in order to avoid typing errors:
+
+sed -i 's/EXTRA_CFLAGS += -DCONFIG_CONCURRENT_MODE/#EXTRA_CFLAGS += -DCONFIG_CONCURRENT_MODE/g' ~/rtl8723bu/Makefile
+
+Press Enter.
+
+g. Now compile the required kernel module from the driver packages. Copy/paste this line into the terminal, in order to enter the folder with the driver packages:
+
+cd rtl8723bu
+
+And then run this command:
+
+make
+
+h. Finally, install the compiled module with this command:
+
+sudo make install
+
+i. Now put the current flawed driver on the blacklist; for that, use copy/paste to transfer the following command line to the terminal:
+
+xed admin:///etc/modprobe.d/blacklist.conf
+
+Now a text file is being opened. In that text file, add the following blue text block, at the end of the existing text (use copy/paste):
+
+# The rtl8xxxu driver is flawed,
+# so it needs to be prevented from loading.
+# This should give the 8723au or the 8723bu driver
+# the chance to load instead.
+blacklist rtl8xxxu
+
+Save the modified text file and close it.
+
+j. Now you're going to remove the folder with the driver building blocks, which has become useless (and can't be used for other kernels, as it has been tailored to your current kernel by "make"). With this command:
+
+rm -v -R --interactive=never ~/rtl8723bu
+
+k. Reboot your computer.
+
+l. Your wifi should work well now: click on the icon of Network Manager in the system tray, in order to see the available wireless networks.
+
+Note: Do NOT install kernel updates or new kernels, because then you'll probably lose the driver again! So I advise to lock the current kernel (item 7).
+
+
+Or if you want to install newer kernels anyway, from time to time: download the folder with the driver build packages again with git, create a compressed (.tar.gz) file from it, rename the compressed file to wifi-driver and keep it in reserve.
+
+You can then use it in the now familiar way (first unzip it, of course) to build and install the driver again when you've lost your WiFi after booting with a newly installed kernel.
+
+HP laptop with RTL8723DE chipset: try antenna selection or a new driver
+5. Some HP laptops with the Realtek WiFi chipset card RTL8723DE have just one antenna on that card designed for two (stingy HP, anyone?). This has caused many problems for Linux users, as the default antenna is usually the missing one....
+
+But thanks to Larry Finger and the good people at Realtek you can do some testing with a module parameter that allows for antenna selection. As follows:
+
+a. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+b. First unload the currently active module with this command (use copy/paste to transfer it into the terminal):
+
+sudo modprobe -r rtw_8723de
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+c. Then reload it with the instruction to use antenna number 2, with this command:
+
+sudo modprobe rtw_8723de ant_sel=2
+
+Press Enter.
+
+d. Then check the signal strength with this command:
+
+iwlist scan | egrep -i 'ssid|quality'
+
+Press Enter.
+
+e. Then test the the other antenna (number 1), to find out which one has a stronger signal. For this, execute the following three commands:
+
+sudo modprobe -r rtw_8723de
+
+sudo modprobe rtw_8723de ant_sel=1
+
+iwlist scan | egrep -i 'ssid|quality'
+
+f. If ant_sel=2 gives the best signal (which is usually the case), do this (this is one line, use copy/paste to transfer it to the terminal):
+
+echo "options rtw_8723de ant_sel=2" | sudo tee -a /etc/modprobe.d/rtw_8723de.conf
+
+Reboot your computer.
+
+If ant_sel=1 gives the best signal (unusual, but not impossible), do this (this is one line, use copy/paste to transfer it to the terminal):
+
+echo "options rtw_8723de ant_sel=1" | sudo tee -a /etc/modprobe.d/rtw_8723de.conf
+
+g. Hasn't this hack improved matters? Then try the rtw88 driver from Larry Finger, as described in item 7 below.
+
+Driver for the Realtek RTL8821CE chipset
+6. Below you'll find a how-to for installing a driver, which should get your RTL8821CE chipset to work.
+
+Proceed like this:
+
+a. First establish temporary internet connection for your computer by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal, in order to install the application mokutil and to let it examine the Secure Boot status of your machine:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+
+d. Copy/paste the following command line into the terminal, in order to install the driver:
+
+sudo apt-get install rtl8821ce-dkms
+
+Press Enter.
+
+e. Reboot your computer. Your WiFi card should work now. If not: try the rtw88 driver, as described in item 7 below.
+
+The rtw88 driver from lwfinger for many Realtek chipsets
+7. For the following Realtek WiFi chipsets you can install the rtw88 driver from Larry Finger (lwfinger):
+RTL8822BE, RTL8822CE, RTL8821CE, RTL8723DE, RTL8822BU, RTL8822CU, RTL8821CU, RTL8723DU, RTL8822BS, RTL8822CS, RTL8821CS and RTL8723DS.
+
+Note: For the RTL8723DE chipset it's sometimes not necessary to replace the driver, because the default driver can sometimes be fixed by switching the antenna selection, as described in item 5 on this page.
+
+a. First establish temporary internet connection for your computer by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+d. Copy/paste the following command line into the terminal, in order to download and install the required build packages (the building tools with which you're going to build the driver):
+
+sudo apt-get install git build-essential linux-headers-$(uname -r)
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+e. Download the actual driver (the construction kit) by means of git, with this command (use copy/paste):
+
+git clone https://github.com/lwfinger/rtw88.git
+
+f. Copy/paste this line into the terminal, in order to enter the folder with the driver packages:
+
+cd rtw88
+
+Press Enter.
+
+g. Now you're going to compile the required kernel module from the driver package. For that, run this command:
+
+make
+
+h. Finally, install the compiled module with this command:
+
+sudo make install
+
+i. Now you're going to remove the folder with the driver building blocks, which has become useless (and can't be used for other kernels, as it has been tailored to your current kernel by "make"). With this command:
+
+rm -v -R --interactive=never ~/rtw88
+
+j. Reboot your computer.
+
+k. Your wifi should work well now: click on the icon of Network Manager in the system tray, in order to see the available wireless networks.
+
+Note: Do NOT install kernel updates or new kernels, because then you'll probably lose the driver again! So I advise to lock the current kernel (item 7).
+
+
+Or if you want to install newer kernels anyway, from time to time: download the folder with the driver build packages again with git, create a compressed (.tar.gz) file from it, rename the compressed file to wifi-driver and keep it in reserve.
+
+You can then use it in the now familiar way (first unzip it, of course) to build and install the driver again when you've lost your WiFi after booting with a newly installed kernel.
+
+Driver for the Realtek RTL8814AU WiFi chipset
+8. For the Realtek RTL8814AU chipset, proceed as follows:
+
+a. Establish temporary internet connection by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter.
+
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+c. Install some tools (use copy/paste to transfer the following command line into the terminal):
+
+sudo apt-get install build-essential dkms git iw linux-headers-$(uname -r)
+
+d. Download the driver components from a GitHub account:
+
+git clone https://github.com/morrownr/8814au.git
+
+e. Go to the driver components folder:
+
+cd 8814au
+
+f. Tailor the driver components to your Linux kernel, with these two commands:
+
+- First this one, which helps to ensure a clean process:
+
+make clean
+
+- Then this one, which does the actual tailoring:
+
+make
+
+g. Now install the driver for your kernel:
+
+sudo make install
+
+h. Then you're going to remove the folder with the driver building blocks, which has become useless (and can't be used for other kernels, as it has been tailored to your current kernel by "make"). With this command:
+
+rm -v -R --interactive=never ~/8814au
+
+i. Reboot and test. Your WiFi should work now.
+
+Note: Do NOT install kernel updates or new kernels, because then you'll probably lose the driver again! So I advise to lock the current kernel (item 7).
+
+The rtw89 driver from lwfinger for the RTL8852AE, RTL8852BE and RTL8852CE chipsets
+9. For the RTL8852AE, RTL8852BE and RTL8852CE Realtek WiFi chipsets you can install the latest rtw89 driver from Larry Finger (lwfinger).
+
+a. First establish temporary internet connection for your computer by means of your cell phone.
+
+b. Launch a terminal window.
+(You can launch a terminal window like this: *Click*)
+
+c. Copy/paste the following command line into the terminal:
+
+sudo apt-get install mokutil && mokutil --sb-state
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+If it reports that Secure Boot is enabled: reboot and disable Secure Boot in the BIOS. In order to do this, you might need to set an administrator password in the BIOS first.
+
+No worries: although Secure Boot is a fairly reasonable idea in theory, it provides little real-life security anyway. So disabling it is no loss. In practice, Secure Boot is primarily an obstacle for using another operating system than Microsoft Windows. Which might or might not be an intended side effect.
+
+d. Copy/paste the following command line into the terminal, in order to download and install the required build packages (the building tools with which you're going to build the driver):
+
+sudo apt-get install make gcc git build-essential linux-headers-$(uname -r)
+
+Press Enter. Type your password when prompted. In Ubuntu this remains entirely invisible, not even dots will show when you type it, that's normal. In Mint this has changed: you'll see asterisks when you type. Press Enter again.
+
+e. Download the actual driver (the construction kit) by means of git, with this command (use copy/paste):
+
+git clone https://github.com/lwfinger/rtw89.git
+
+f. Copy/paste this line into the terminal, in order to enter the folder with the driver packages:
+
+cd rtw89
+
+Press Enter.
+
+g. Now you're going to compile the required kernel module from the driver package. For that, run this command:
+
+make
+
+h. Finally, install the compiled module with this command:
+
+sudo make install
+
+i. Now you're going to remove the folder with the driver building blocks, which has become useless (and can't be used for other kernels, as it has been tailored to your current kernel by "make"). With this command:
+
+rm -v -R --interactive=never ~/rtw89
+
+j. Then you'll need to blacklist the default (and suboptimal) kernel drivers for the devices that are covered by your new rtw89 driver. With these three commands (execute them one by one):
+
+echo "blacklist rtw89_8852ae" | sudo tee -a /etc/modprobe.d/blacklist.conf
+
+echo "blacklist rtw89_8852be" | sudo tee -a /etc/modprobe.d/blacklist.conf
+
+echo "blacklist rtw89_8852ce" | sudo tee -a /etc/modprobe.d/blacklist.conf
+
+k. Reboot your computer.
+
+l. Your wifi should work well now: click on the icon of Network Manager in the system tray, in order to see the available wireless networks.
+
+Note: Do NOT install kernel updates or new kernels, because then you'll probably lose the driver again! So I advise to lock the current kernel (item 7).
+
+Or if you want to install newer kernels anyway, from time to time: download the folder with the driver build packages again with git, create a compressed (.tar.gz) file from it, rename the compressed file to wifi-driver and keep it in reserve.
+
+You can then use it in the now familiar way (first unzip it, of course) to build and install the driver again when you've lost your WiFi after booting with a newly installed kernel.
+
+Check the Draft tips for more Realtek WiFi solutions
+10. Didn't find what you were looking for? On the Draft tips page you'll find more Realtek solutions.
+
+
+Want more tips?
+
+Do you want more tips and tweaks? There's a lot more of them on this website!
+
+For example:
+
+Speed up your Linux Mint!
+
+Clean your Linux Mint safely
+
+Avoid 10 fatal mistakes
+
+
+To the content of this website applies a Creative Commons license.
+
+Back to the home page
+
+Disclaimer
+Email ThisBlogThis!Share to XShare to FacebookShare to Pinterest
+Home
+Support this website?
+If my website has helped you, then please consider supporting it....
+
+You can support it by making a donation (for which you get two free goodies in return!). Or you can configure your ad blocker to make an exception for my website.
+
+Thanks in advance....
+Search This Website
+	
+How to use these tips in Ubuntu 24.04.x
+The tips and how-to's on this website are primarily written for Linux Mint 22.x. But you can also use them in Ubuntu 24.04.x, provided that you do this first (*click*).
+Most popular pages
+
+    Speed Up your Mint!
+    10 Things to Do First in Linux Mint 22.1 Xia
+    How to Clean Linux Mint Safely
+    SSD: how to optimize your Solid State Drive for Linux Mint and Ubuntu
+    Avoid 10 Fatal Mistakes in Linux Mint and Ubuntu
+    Security in Linux Mint and Ubuntu: an Explanation and Some Tips
+    Wireless security: four popular myths and 12 tips
+    How to solve internet connection problems
+    Donate and get two free goodies!
+
+Windows 7 and 8.x are dangerous!
+Windows 7 and 8.x get no security updates anymore.
+Microsoft has ended its support for Windows 7 and 8.x entirely. Which makes Windows 7 and 8.x far too insecure for internet use.
+So don't wait and switch to a secure, easy and free (no cost) Linux!
+Donate and get free goodies
+Support this website by making a donation and get free goodies!
+Tips, tweaks and FAQ
+
+    Home
+    50 Tips and Tweaks for Linux Mint - PART ONE
+    50 Tips and Tweaks for Linux Mint - PART TWO
+    50 Tips and Tweaks for Linux Mint - PART THREE
+    System hacks for advanced Linux Mint users
+    60 Frequently Asked Questions about Linux Mint: PART 1
+    60 Frequently Asked Questions about Linux Mint: PART 2
+    60 Frequently Asked Questions about Linux Mint: PART 3
+
+	
+	
+Simple theme. Powered by Blogger.
