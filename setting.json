@@ -1,0 +1,6 @@
+//vscode setting to enable preetiter
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.singleQuote": false, // Ensures double quotes
+  "editor.formatOnSave": true // Auto-format on save
+}
